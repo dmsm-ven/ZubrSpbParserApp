@@ -1,0 +1,92 @@
+﻿<Window
+    x:Class="ZubrSpbParserApp.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:bl="clr-namespace:ZubrSpbParserApp.BL"
+    xmlns:conv="clr-namespace:ZubrSpbParserApp.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ZubrSpbParserApp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="MainWindow"
+    Width="712"
+    Height="200"
+    Loaded="Window_Loaded"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <conv:BoolInverseConverter x:Key="BoolInverseConverter" />
+
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="6,2" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel>
+        <Grid DockPanel.Dock="Bottom">
+            <ProgressBar
+                x:Name="pbIndicator"
+                Height="14"
+                Maximum="1"
+                Minimum="0" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Binding ElementName=pbIndicator, Path=Value, StringFormat={}{0:P2}}" />
+        </Grid>
+
+
+        <StackPanel>
+            <StackPanel IsEnabled="{Binding IsParsingInProgress, Converter={StaticResource BoolInverseConverter}}" Orientation="Horizontal">
+                <Button
+                    x:Name="btnStartParse"
+                    Click="btnStartParse_Click"
+                    Content="Запустить парсер" />
+                <Button
+                    x:Name="btnDownloadResources"
+                    Click="btnDownloadResources_Click"
+                    Content="Скачать ресурсы"
+                    IsEnabled="{Binding HasExportData}" />
+            </StackPanel>
+            <StackPanel IsEnabled="{Binding HasExportData}" Orientation="Horizontal">
+                <TextBlock
+                    Margin="10,2"
+                    VerticalAlignment="Center"
+                    Text="start PID" />
+                <TextBox
+                    x:Name="txtStartPID"
+                    Width="50"
+                    Margin="4,2"
+                    VerticalAlignment="Center"
+                    Text="-1" />
+                <Button
+                    x:Name="btnGeneralExport"
+                    Click="btnGeneralExport_Click"
+                    Content="Экспорт товаров" />
+                <Button
+                    x:Name="btnExportAdditionalImages"
+                    Click="btnExportAdditionalImages_Click"
+                    Content="Экспорт изображений" />
+                
+            </StackPanel>
+            <StackPanel>
+                <Button
+    x:Name="btnExportImages"
+    Click="btnExportImages_Click"
+    Content="SQL изображения" />
+                <Button
+    x:Name="btnExportDescription"
+    Click="btnExportDescription_Click"
+    Content="SQL описания" />
+                <Button
+    x:Name="btnExportDimensions"
+    Click="btnExportDimensions_Click"
+    Content="SQL Dimensions" />
+                <Button
+    x:Name="btnExportPdf"
+    Click="btnExportPdf_Click"
+    Content="SQL PDF" />
+            </StackPanel>
+        </StackPanel>
+    </DockPanel>
+
+</Window>
