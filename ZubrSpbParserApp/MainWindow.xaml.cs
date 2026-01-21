@@ -37,7 +37,7 @@ namespace ZubrSpbParserApp
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await manager.Load();
-
+            MessageBox.Show("Сделать фикс названий брендов (неправильный регистр, например KRAFTOOL вместо Kraftool) при экспорте");
         }
 
         private async void btnStartParse_Click(object sender, RoutedEventArgs e)

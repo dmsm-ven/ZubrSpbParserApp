@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:ZubrSpbParserApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="MainWindow"
+    Title="Парсер Zubr/Steher/Stayer/Kraftool"
     Width="712"
     Height="200"
     Loaded="Window_Loaded"
@@ -66,25 +66,25 @@
                     x:Name="btnExportAdditionalImages"
                     Click="btnExportAdditionalImages_Click"
                     Content="Экспорт изображений" />
-                
+
             </StackPanel>
             <StackPanel>
                 <Button
-    x:Name="btnExportImages"
-    Click="btnExportImages_Click"
-    Content="SQL изображения" />
+                    x:Name="btnExportImages"
+                    Click="btnExportImages_Click"
+                    Content="SQL изображения" />
                 <Button
-    x:Name="btnExportDescription"
-    Click="btnExportDescription_Click"
-    Content="SQL описания" />
+                    x:Name="btnExportDescription"
+                    Click="btnExportDescription_Click"
+                    Content="SQL описания" />
                 <Button
-    x:Name="btnExportDimensions"
-    Click="btnExportDimensions_Click"
-    Content="SQL Dimensions" />
+                    x:Name="btnExportDimensions"
+                    Click="btnExportDimensions_Click"
+                    Content="SQL Dimensions" />
                 <Button
-    x:Name="btnExportPdf"
-    Click="btnExportPdf_Click"
-    Content="SQL PDF" />
+                    x:Name="btnExportPdf"
+                    Click="btnExportPdf_Click"
+                    Content="SQL PDF" />
             </StackPanel>
         </StackPanel>
     </DockPanel>
