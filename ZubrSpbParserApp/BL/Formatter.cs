@@ -1,4 +1,6 @@
 ﻿using HtmlAgilityPack;
+using SlugGenerator;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,6 +24,8 @@ namespace ZubrSpbParserApp.BL
 
             FixEmptyProducts();
 
+            this.products = this.products.OrderBy(p => p.Manufacturer).ToList();
+
         }
 
         private void FixEmptyProducts()
@@ -41,6 +45,7 @@ namespace ZubrSpbParserApp.BL
                 })
                 .ToDictionary(i => i.Sku, i => i);
 
+            int fixedCount = 0;
             foreach (var product in this.products)
             {
                 if ((string.IsNullOrWhiteSpace(product.Name) || string.IsNullOrWhiteSpace(product.Manufacturer))
@@ -48,8 +53,11 @@ namespace ZubrSpbParserApp.BL
                 {
                     product.Name = fix.Name;
                     product.Manufacturer = fix.Manufacturer;
+                    fixedCount++;
                 }
             }
+
+            Debug.WriteLine($"Всего исправлено товаров из словаря {fixedCount} из {products.Count}");
         }
 
         public string GetGeneralExport()
@@ -61,8 +69,8 @@ namespace ZubrSpbParserApp.BL
             {
                 string mainImage = GetMainImage(product);
 
-                string caption = $"{product.Sku} {product.Manufacturer} {product.ProductType}";
-                string keyword = Regex.Replace(Transliteration.Front(caption, true), "-{2,}", "-").Trim('-');
+                string caption = $"{product.Sku} {product.ManufacturerEtkName} {product.ProductType()}";
+                string keyword = caption.GenerateSlug();
                 string meta_title = $"{caption} купить в Санкт-Петербурге";
                 string meta_desc = $"{meta_title} с доставкой по России";
 
@@ -79,7 +87,7 @@ namespace ZubrSpbParserApp.BL
                     .AppendTab(string.Empty)   //location
                     .AppendTab("0")   //quantity
                     .AppendTab(product.Sku)   //model
-                    .AppendTab(product.Manufacturer)   //manufacturer
+                    .AppendTab(product.ManufacturerEtkName)   //manufacturer
                     .AppendTab(mainImage)   //image_name
                     .AppendTab("yes")   //shipping
                     .AppendTab("0")   //price
@@ -149,7 +157,7 @@ namespace ZubrSpbParserApp.BL
                 sb.Append($"JOIN oc_product ON oc_product_description.product_id = oc_product.product_id ");
                 sb.Append($"JOIN oc_manufacturer ON oc_product.manufacturer_id = oc_manufacturer.manufacturer_id ");
                 sb.Append($"SET oc_product_description.description = '{HttpUtility.HtmlEncode(BuildDescriptionForProduct(product))}'");
-                sb.AppendLine($"WHERE oc_manufacturer.name = '{product.Manufacturer}' AND (oc_product.model = '{product.Sku}' OR oc_product.sku = '{product.Sku}');");
+                sb.AppendLine($"WHERE oc_manufacturer.name = '{product.ManufacturerEtkName}' AND (oc_product.model = '{product.Sku}' OR oc_product.sku = '{product.Sku}');");
             }
 
             return sb.ToString();
@@ -214,7 +222,12 @@ namespace ZubrSpbParserApp.BL
                 sb.AppendLine("<tbody>");
                 foreach (var characteristic in product.Characteristics)
                 {
-                    sb.AppendLine($"<tr><td>{characteristic.Name}</td><td>{characteristic.Value}</td></tr>");
+                    string val = characteristic.Value;
+                    if (characteristic.Name.StartsWith("Габариты"))
+                    {
+                        val = Regex.Replace(val, "^(.*?) (мм|см)$", "$1");
+                    }
+                    sb.AppendLine($"<tr><td>{characteristic.Name}</td><td>{val}</td></tr>");
                 }
                 sb.AppendLine("</tbody>");
                 sb.AppendLine("</table>");
@@ -265,11 +278,11 @@ namespace ZubrSpbParserApp.BL
                     if (sort_order == 0)
                     {
                         mainBuilder.Append($"UPDATE oc_product SET image = '{path}' ");
-                        mainBuilder.AppendLine($"WHERE manufacturer_id = (SELECT manufacturer_id FROM oc_manufacturer WHERE name = '{product.Manufacturer}') AND (model = '{product.Sku}' OR sku = '{product.Sku}');");
+                        mainBuilder.AppendLine($"WHERE manufacturer_id = (SELECT manufacturer_id FROM oc_manufacturer WHERE name = '{product.ManufacturerEtkName}') AND (model = '{product.Sku}' OR sku = '{product.Sku}');");
                     }
                     else
                     {
-                        string product_id = $"(SELECT product_id FROM oc_product WHERE manufacturer_id = (SELECT manufacturer_id FROM oc_manufacturer WHERE name = '{product.Manufacturer}') AND (model = '{product.Sku}' OR sku = '{product.Sku}') LIMIT 1)";
+                        string product_id = $"(SELECT product_id FROM oc_product WHERE manufacturer_id = (SELECT manufacturer_id FROM oc_manufacturer WHERE name = '{product.ManufacturerEtkName}') AND (model = '{product.Sku}' OR sku = '{product.Sku}') LIMIT 1)";
                         additionalBuilder.AppendLine($"({product_id}, '{path}', {sort_order}),");
                     }
                     sort_order++;
@@ -288,7 +301,7 @@ namespace ZubrSpbParserApp.BL
                 string product_id = $"(SELECT product_id FROM oc_product WHERE manufacturer_id = (SELECT manufacturer_id FROM oc_manufacturer WHERE name = '{product.Manufacturer}') AND (model = '{product.Sku}' OR sku = '{product.Sku}') LIMIT 1)";
 
                 var dimensionsChar = product.Characteristics.FirstOrDefault(c => c.Name == "Габариты (ДхШхВ)");
-                
+
                 if (dimensionsChar != null)
                 {
                     dimensionsChar.Value = dimensionsChar.Value.Replace("&times;", "×");
