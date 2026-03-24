@@ -153,11 +153,15 @@ namespace ZubrSpbParserApp.BL
             var sb = new StringBuilder();
             foreach (var product in products)
             {
-                sb.Append($"UPDATE IGNORE oc_product_description ");
-                sb.Append($"JOIN oc_product ON oc_product_description.product_id = oc_product.product_id ");
-                sb.Append($"JOIN oc_manufacturer ON oc_product.manufacturer_id = oc_manufacturer.manufacturer_id ");
-                sb.Append($"SET oc_product_description.description = '{HttpUtility.HtmlEncode(BuildDescriptionForProduct(product))}'");
-                sb.AppendLine($"WHERE oc_manufacturer.name = '{product.ManufacturerEtkName}' AND (oc_product.model = '{product.Sku}' OR oc_product.sku = '{product.Sku}');");
+                var desc = HttpUtility.HtmlEncode(BuildDescriptionForProduct(product));
+                if (!string.IsNullOrWhiteSpace(desc))
+                {
+                    sb.Append($"UPDATE IGNORE oc_product_description ");
+                    sb.Append($"JOIN oc_product ON oc_product_description.product_id = oc_product.product_id ");
+                    sb.Append($"JOIN oc_manufacturer ON oc_product.manufacturer_id = oc_manufacturer.manufacturer_id ");
+                    sb.Append($"SET oc_product_description.description = '{desc}' ");
+                    sb.AppendLine($"WHERE oc_manufacturer.name = '{product.ManufacturerEtkName}' AND (oc_product.model = '{product.Sku}' OR oc_product.sku = '{product.Sku}');");
+                }
             }
 
             return sb.ToString();
@@ -298,7 +302,7 @@ namespace ZubrSpbParserApp.BL
             var sb = new StringBuilder();
             foreach (var product in products)
             {
-                string product_id = $"(SELECT product_id FROM oc_product WHERE manufacturer_id = (SELECT manufacturer_id FROM oc_manufacturer WHERE name = '{product.Manufacturer}') AND (model = '{product.Sku}' OR sku = '{product.Sku}') LIMIT 1)";
+                string product_id = $"WHERE manufacturer_id = (SELECT manufacturer_id FROM oc_manufacturer WHERE name = '{product.Manufacturer}') AND (model = '{product.Sku}' OR sku = '{product.Sku}')";
 
                 var dimensionsChar = product.Characteristics.FirstOrDefault(c => c.Name == "Габариты (ДхШхВ)");
 
@@ -317,7 +321,7 @@ namespace ZubrSpbParserApp.BL
                             .Append($"length = {length.ToString("F2").Replace(",", ".")},")
                             .Append($"width = {width.ToString("F2").Replace(",", ".")}, ")
                             .Append($"height = {height.ToString("F2").Replace(",", ".")} ");
-                        sb.AppendLine($" WHERE product_id = {product_id};");
+                        sb.AppendLine($" {product_id};");
                     }
                     else
                     {
@@ -336,7 +340,7 @@ namespace ZubrSpbParserApp.BL
                         {
                             throw new FormatException("Неизвестная единицы веса");
                         }
-                        sb.AppendLine($"UPDATE IGNORE oc_product SET weight = {weight.ToString("F4").Replace(",", ".")} WHERE product_id = {product_id};");
+                        sb.AppendLine($"UPDATE IGNORE oc_product SET weight = {weight.ToString("F4").Replace(",", ".")} {product_id};");
                     }
                     else
                     {
