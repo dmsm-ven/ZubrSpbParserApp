@@ -18,6 +18,17 @@ namespace ZubrSpbParserApp.BL
         private readonly string? storageFile;
         private List<Product>? products;
 
+        string statusString;
+        public string StatusString
+        {
+            get => statusString;
+            set
+            {
+                statusString = value;
+                OnPropertyChanged(nameof(StatusString));
+            }
+        }
+
         private bool isParsingInProgress;
         public bool IsParsingInProgress
         {
@@ -52,7 +63,7 @@ namespace ZubrSpbParserApp.BL
             this.resourcesRootFolder = resourcesRootFolder;
         }
 
-        public async Task ParseProducts(IProgress<double> progress)
+        public async Task ParseProducts(IProgress<(double, string)> progress)
         {
             IsParsingInProgress = true;
             try

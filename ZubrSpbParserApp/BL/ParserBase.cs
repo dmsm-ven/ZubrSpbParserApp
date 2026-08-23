@@ -1,12 +1,12 @@
-﻿using System.Net;
+﻿using HtmlAgilityPack;
+using System.Net;
 using System.Net.Http;
-using HtmlAgilityPack;
 
 namespace ZubrSpbParserApp.BL
 {
     public abstract class ParserBase
     {
-        private readonly HttpClient client;
+        public readonly HttpClient client;
 
         public ParserBase()
         {

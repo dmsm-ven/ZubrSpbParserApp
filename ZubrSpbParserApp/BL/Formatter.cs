@@ -224,8 +224,15 @@ namespace ZubrSpbParserApp.BL
                 sb.AppendLine("<tr><th>Характеристика</th><th>Значение</th></tr>");
                 sb.AppendLine("</thead>");
                 sb.AppendLine("<tbody>");
+
+                string currentGroup = "";
                 foreach (var characteristic in product.Characteristics)
                 {
+                    if (!string.IsNullOrWhiteSpace(characteristic.Group) && characteristic.Group != currentGroup)
+                    {
+                        currentGroup = characteristic.Group;
+                        sb.AppendLine($"<tr><td colspan=\"2\">{characteristic.Group}</td></tr>");
+                    }
                     string val = characteristic.Value;
                     if (characteristic.Name.StartsWith("Габариты"))
                     {

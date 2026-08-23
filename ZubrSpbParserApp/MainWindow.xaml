@@ -9,7 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="Парсер Zubr/Steher/Stayer/Kraftool"
     Width="712"
-    Height="200"
+    SizeToContent="Height"
     Loaded="Window_Loaded"
     mc:Ignorable="d">
     <Window.Resources>
@@ -29,9 +29,10 @@
                 Maximum="1"
                 Minimum="0" />
             <TextBlock
+                x:Name="txtStatusString"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="{Binding ElementName=pbIndicator, Path=Value, StringFormat={}{0:P2}}" />
+                d:Text="0% - Поиск товара" />
         </Grid>
 
 
